@@ -18,7 +18,7 @@ permissions and limitations under the License.
 /* eslint no-invalid-this: "off", no-trailing-spaces: "off" */
 'use strict';
 
-let grpcucumber = (function() {
+let grpcucumber = (function () {
     // Types
     const Variables = require('./variables').Variables;
     // modules
@@ -33,8 +33,8 @@ let grpcucumber = (function() {
 
     const _globalVariables = new Variables();
 
-    const evaluatePath = function(path, content) {
-        const evalResult = _jsonPath({resultType: 'all'}, path, content);
+    const evaluatePath = function (path, content) {
+        const evalResult = _jsonPath({ resultType: 'all' }, path, content);
         return (evalResult.length > 0) ? evalResult[0].value : null;
     };
 
@@ -70,6 +70,7 @@ let grpcucumber = (function() {
             this.responseError = {};
             this.requestMetadata = {};
             this.scenarioVariables = new Variables();
+            this.streams = new Variables();
         }
 
         /**
@@ -82,21 +83,21 @@ let grpcucumber = (function() {
             let parts = serviceName.split('.');
             let Creator;
             try {
-                Creator = parts.reduce((o, i)=>o[i], grpcPackage);
+                Creator = parts.reduce((o, i) => o[i], grpcPackage);
             } catch (e) {
                 throw new Error('Unable to find gRPC client constructor in package, check service name (ensure it matches correctly). Error info: ' + e);
             }
 
             return new Creator(grpcHost, grpcCredentials, grpcOptions);
         }
-        
+
         /**
          * Stores a value in the scenario scoped variables
          */
         storeValueInScenarioScope(variableName, value) {
             this.scenarioVariables.set(variableName, value);
         }
-        
+
         /**
          * Stores a value in the global scoped variables
          */
@@ -119,6 +120,27 @@ let grpcucumber = (function() {
         }
 
         /**
+        * Stores a stream
+        */
+        storeStream(streamName, stream) {
+            this.streams.set(streamName, stream);
+        }
+
+        /**
+         * Retrieves a stream
+         */
+        getStream(streamName) {
+            return this.streams.get(streamName);
+        }
+
+        /**
+         * Removes a stream
+         */
+        removeStream(streamName) {
+            return this.streams.remove(streamName);
+        }
+
+        /**
          * Stores the value of a response message path in a scenario scoped variable
          */
         storeValueOfResponseMessagePathInScenarioScope(path, variableName) {
@@ -126,7 +148,7 @@ let grpcucumber = (function() {
             const value = this.getResponseMessagePathValue(path);
             this.scenarioVariables.set(variableName, value);
         }
-        
+
         /**
          * Stores the value of a response message path in a global scoped variable
          */
@@ -135,26 +157,106 @@ let grpcucumber = (function() {
             const value = this.getResponseMessagePathValue(path);
             _globalVariables.set(variableName, value);
         }
-        
+
         /**
          * Replaces variable identifiers in the resource string
          * with their value in all scopes if it exists
          */
         replaceVariables(resource) {
-            resource = _interpolate(resource, _globalVariables.getAll(), {delimiter: this.options.variableDelimiter});
-            resource = _interpolate(resource, this.scenarioVariables.getAll(), {delimiter: this.options.variableDelimiter});
+            resource = _interpolate(resource, _globalVariables.getAll(), { delimiter: this.options.variableDelimiter });
+            resource = _interpolate(resource, this.scenarioVariables.getAll(), { delimiter: this.options.variableDelimiter });
             return resource;
         }
-        
+
+        /**
+         * Calls a gRPC stream
+         */
+        stream(rpcName, id, callback) { // callback(error, message)
+            if (typeof this.client[rpcName] === 'function') {
+                let call = this.client[rpcName](
+                    function (error, responseMessage) {
+                        if (error) {
+                            this.responseStatus = _grpcLibrary.status[error.code];
+                            this.responseError = error;
+                        } else {
+                            this.responseMessage = responseMessage;
+                        }
+                        if (this.onStreamEnd) this.onStreamEnd(id);
+                    }.bind(this)
+                );
+                this.storeStream(id, call);
+                callback();
+            } else {
+                callback(rpcName + ' is not a valid resource.');
+            }
+        }
+
+        /**
+         * Ends a gRPC stream
+         */
+        streamEnd(id, callback) {
+            let stream = this.getStream(id);
+            this.onStreamEnd = function (id) {
+                this.removeStream(id);
+                callback();
+                this.onStreamEnd = null;
+            }.bind(this);
+            stream.end();
+        }
+
+        /**
+         * Writes message to stream from JSON string
+         */
+        streamWriteFromString(id, content, callback) {
+            let stream = this.getStream(id);
+            content = this.replaceVariables(content);
+            let json = JSON.parse(content);
+            stream.write(json);
+            callback();
+        }
+
+        /**
+         * Writes message to stream from a hash value table
+         */
+        streamWriteFromTable(id, valuesTable, callback) {
+            let body = {};
+
+            valuesTable.hashes().forEach(function (v) {
+                const name = this.replaceVariables(v.name);
+                const value = this.replaceVariables(v.value);
+                body[name] = value;
+            }.bind(this));
+
+            this.streamWriteFromString(id, JSON.stringify(body), callback);
+        }
+
+        /**
+         * Writes message to stream from a file
+         */
+        streamWriteFromFile(id, file, callback) {
+            file = this.replaceVariables(file);
+            _fs.readFile(
+                _path.join(this.options.fixturesDirectory, file),
+                'utf8',
+                function (err, data) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        this.streamWriteFromString(id, data, callback);
+                    }
+                }.bind(this)
+            );
+        }
+
         /**
          * Calls a gRPC function
          */
         request(rpcName, callback) { // callback(error, message)
             if (typeof this.client[rpcName] === 'function') {
                 this.client[rpcName](
-                    this.requestMessage, 
-                    this.requestMetadata, 
-                    function(error, responseMessage) {
+                    this.requestMessage,
+                    this.requestMetadata,
+                    function (error, responseMessage) {
                         if (error) {
                             this.responseStatus = _grpcLibrary.status[error.code];
                             this.responseError = error;
@@ -169,7 +271,7 @@ let grpcucumber = (function() {
                 callback(rpcName + ' is not a valid resource.');
             }
         }
-        
+
         /**
          * Sets the request message from a JSON string
          */
@@ -184,7 +286,7 @@ let grpcucumber = (function() {
         setRequestMessageFromTable(valuesTable) {
             let body = {};
 
-            valuesTable.hashes().forEach(function(v) {
+            valuesTable.hashes().forEach(function (v) {
                 const name = this.replaceVariables(v.name);
                 const value = this.replaceVariables(v.value);
                 body[name] = value;
@@ -199,9 +301,9 @@ let grpcucumber = (function() {
         setRequestMessageFromFile(file, callback) {
             file = this.replaceVariables(file);
             _fs.readFile(
-                _path.join(this.options.fixturesDirectory, file), 
-                'utf8', 
-                function(err, data) {
+                _path.join(this.options.fixturesDirectory, file),
+                'utf8',
+                function (err, data) {
                     if (err) {
                         callback(err);
                     } else {
@@ -211,7 +313,7 @@ let grpcucumber = (function() {
                 }.bind(this)
             );
         }
-        
+
         /**
          * Sets the metadata from a JSON string
          */
@@ -219,8 +321,8 @@ let grpcucumber = (function() {
             content = this.replaceVariables(content);
             let jsonMetadata = JSON.parse(content);
             let metadata = new _grpcLibrary.Metadata();
-            
-            Object.keys(jsonMetadata).forEach(function(key) {
+
+            Object.keys(jsonMetadata).forEach(function (key) {
                 metadata.add(key, jsonMetadata[key]);
             });
 
@@ -232,8 +334,8 @@ let grpcucumber = (function() {
          */
         setRequestMetadataFromTable(valuesTable) {
             let metadata = new _grpcLibrary.Metadata();
-            
-            valuesTable.hashes().forEach(function(v) {
+
+            valuesTable.hashes().forEach(function (v) {
                 const name = this.replaceVariables(v.name);
                 const value = this.replaceVariables(v.value);
                 metadata.add(name, value);
@@ -248,9 +350,9 @@ let grpcucumber = (function() {
         setRequestMetadataFromFile(file, callback) {
             file = this.replaceVariables(file);
             _fs.readFile(
-                _path.join(this.options.fixturesDirectory, file), 
-                'utf8', 
-                function(err, data) {
+                _path.join(this.options.fixturesDirectory, file),
+                'utf8',
+                function (err, data) {
                     if (err) {
                         callback(err);
                     } else {
@@ -260,7 +362,7 @@ let grpcucumber = (function() {
                 }.bind(this)
             );
         }
-        
+
         /**
          * Gets the response message
          */
@@ -277,13 +379,13 @@ let grpcucumber = (function() {
             } else {
                 callback(
                     _prettyJson.render(
-                        {assertion: assertion}, 
-                        {noColor: true}
+                        { assertion: assertion },
+                        { noColor: true }
                     )
                 );
             }
         }
-        
+
         /**
          * Gets information about an assertion
          */
@@ -298,11 +400,11 @@ let grpcucumber = (function() {
 
         /** 
          * Asserts that a global variable exists 
-         */ 
-        assertGlobalVariableValueExists(name) { 
+         */
+        assertGlobalVariableValueExists(name) {
             return this.getAssertionResult(true, (_globalVariables.get(name) != undefined), 'defined', 'undefined');
         }
-        
+
         /**
          * Asserts that a value matches the expression
          */
@@ -311,7 +413,7 @@ let grpcucumber = (function() {
             let match = regExpObject.test(actualValue);
             return this.getAssertionResult(true, match, expectedExpression, actualValue);
         }
-        
+
         /**
          * Asserts that a value does not match the expression
          */
@@ -320,10 +422,10 @@ let grpcucumber = (function() {
             let match = regExpObject.test(actualValue);
             return this.getAssertionResult(false, match, expectedExpression, actualValue);
         }
-        
+
         /** 
          * Asserts that the reponse status matches
-         */ 
+         */
         assertResponseStatusMatch(value) {
             let expected = true;
             let actual = (_grpcLibrary.status[value] == _grpcLibrary.status[this.responseStatus]);
@@ -338,7 +440,7 @@ let grpcucumber = (function() {
         getResponseMessagePathValue(path) {
             return evaluatePath(path, this.getResponseMessage());
         }
-        
+
         /**
          * Asserts that a path in the response message matches
          */
@@ -346,10 +448,10 @@ let grpcucumber = (function() {
             path = this.replaceVariables(path);
             regexp = this.replaceVariables(regexp);
             let evalValue = this.getResponseMessagePathValue(path);
-            
+
             return this.assertMatch(evalValue, regexp);
         }
-        
+
         /**
          * Asserts that a path in the response message does not match
          */
@@ -357,10 +459,10 @@ let grpcucumber = (function() {
             path = this.replaceVariables(path);
             regexp = this.replaceVariables(regexp);
             let evalValue = this.getResponseMessagePathValue(path);
-            
+
             return this.assertNotMatch(evalValue, regexp);
         }
-        
+
         /**
          * Asserts that a path in the response message is an array
          */
@@ -370,7 +472,7 @@ let grpcucumber = (function() {
             const success = Array.isArray(value);
             return this.getAssertionResult(true, success, 'array', typeof value);
         }
-        
+
         /**
          * Asserts that a path in the response message is an array with specified length
          */
@@ -384,7 +486,7 @@ let grpcucumber = (function() {
                 success = value.length.toString() === length;
                 actual = value.length;
             }
-        
+
             return this.getAssertionResult(true, success, length, actual);
         }
 

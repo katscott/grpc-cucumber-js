@@ -37,6 +37,7 @@
         "cucumber": "^6.0.5",
         "eslint": "^7.4.0",
         "eslint-config-google": "^0.14.0",
-        "grpc": "^1.24.3"
+        "grpc": "^1.24.3",
+        "pig-latin": "^2.0.2"
     }
 }

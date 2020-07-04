@@ -30,6 +30,7 @@ service Greeter {
   rpc SayHelloInMultipleLanguages (HelloMultipleLanguageRequest) returns (HelloMultipleLanguageReply) {}
   rpc SaySomethingElse (google.protobuf.Empty) returns (SomethingElseReply) {}
   rpc ErrorOut (ErrorOutRequest) returns (ErrorOutReply) {}
+  rpc PigLatin(stream PigLatinMessageRequest) returns (PigLatinMessageReply) {}
 }
 
 // The request message containing the user's name.
@@ -62,4 +63,13 @@ message ErrorOutRequest {
 
 // The response message that errors
 message ErrorOutReply {
+}
+
+message PigLatinMessageRequest {
+    string message = 1;
+}
+
+message PigLatinMessageReply {
+    repeated string messages = 1;
+    int32 count = 2;
 }

@@ -18,30 +18,30 @@ permissions and limitations under the License.
 /* eslint new-cap: "off", no-invalid-this: "off" */
 'use strict';
 
-const {Given, When, Then} = require('cucumber');
+const { Given, When, Then } = require('cucumber');
 
-Given(/^I store the raw value (.*) as (.*) in scenario scope$/, function(value, variable, callback) {
+Given(/^I store the raw value (.*) as (.*) in scenario scope$/, function (value, variable, callback) {
     this.grpcucumber.storeValueInScenarioScope(variable, value);
     callback();
 });
 
-Given(/^I store the raw value (.*) as (.*) in global scope$/, function(value, variable, callback) {
+Given(/^I store the raw value (.*) as (.*) in global scope$/, function (value, variable, callback) {
     this.grpcucumber.storeValueInGlobalScope(variable, value);
     callback();
 });
 
-Given(/^I set request message to (.*)$/, function(message, callback) {
+Given(/^I set request message to (.*)$/, function (message, callback) {
     this.grpcucumber.setRequestMessageFromString(message);
     callback();
 });
 
-Given('I set request message to', function(valuesTable, callback) {
+Given('I set request message to', function (valuesTable, callback) {
     this.grpcucumber.setRequestMessageFromTable(valuesTable);
     callback();
 });
 
-Given(/^I pipe contents of file (.*) to request message$/, function(file, callback) {
-    this.grpcucumber.setRequestMessageFromFile(file, function(error) {
+Given(/^I pipe contents of file (.*) to request message$/, function (file, callback) {
+    this.grpcucumber.setRequestMessageFromFile(file, function (error) {
         if (error) {
             callback(new Error(error));
         }
@@ -50,18 +50,18 @@ Given(/^I pipe contents of file (.*) to request message$/, function(file, callba
     });
 });
 
-Given(/^I set request metadata to (.*)$/, function(metadata, callback) {
+Given(/^I set request metadata to (.*)$/, function (metadata, callback) {
     this.grpcucumber.setRequestMetadataFromString(metadata);
     callback();
 });
 
-Given('I set request metadata to', function(valuesTable, callback) {
+Given('I set request metadata to', function (valuesTable, callback) {
     this.grpcucumber.setRequestMetadataFromTable(valuesTable);
     callback();
 });
 
-Given(/^I pipe contents of file (.*) to request metadata$/, function(file, callback) {
-    this.grpcucumber.setRequestMetadataFromFile(file, function(error) {
+Given(/^I pipe contents of file (.*) to request metadata$/, function (file, callback) {
+    this.grpcucumber.setRequestMetadataFromFile(file, function (error) {
         if (error) {
             callback(new Error(error));
         }
@@ -70,68 +70,118 @@ Given(/^I pipe contents of file (.*) to request metadata$/, function(file, callb
     });
 });
 
-Given(/^I have (.*) stored in global scope$/, function(variableName, callback) {
+Given(/^I have (.*) stored in global scope$/, function (variableName, callback) {
     let assertion = this.grpcucumber.assertGlobalVariableValueExists(variableName);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-When(/^I request (.*)$/, function(resource, callback) {
-    this.grpcucumber.request(resource, function(error, responseMessage) {
+Given(/^I open a stream to (.*) with id (.*)$/, function (resource, streamId, callback) {
+    this.grpcucumber.stream(resource, streamId, function (error) {
+        if (error) {
+            callback(new Error(error));
+        }
+
         callback();
     });
 });
 
-Then(/^I store the value of response message path (.*) as (.*) in scenario scope$/, function(path, variable, callback) {
+When(/^I request (.*)$/, function (resource, callback) {
+    this.grpcucumber.request(resource, function (error, responseMessage) {
+        callback();
+    });
+});
+
+When(/^I write (.*) to stream (.*)$/, function (content, streamId, callback) {
+    this.grpcucumber.streamWriteFromString(streamId, content, function (error) {
+        if (error) {
+            callback(new Error(error));
+        }
+
+        callback();
+    });
+});
+
+When(/^I write to stream (.*) with the data$/, function (streamId, tableValues, callback) {
+    this.grpcucumber.streamWriteFromTable(streamId, tableValues, function (error) {
+        if (error) {
+            callback(new Error(error));
+        }
+
+        callback();
+    });
+});
+
+When(/^I pipe contents of file (.*) to stream (.*)$/, function (file, streamId, callback) {
+    this.grpcucumber.streamWriteFromFile(streamId, file, function (error) {
+        if (error) {
+            callback(new Error(error));
+        }
+
+        callback();
+    });
+});
+
+When(/^I end the stream (.*)$/, function (streamId, callback) {
+    this.grpcucumber.streamEnd(streamId, function (error, responseMessage) {
+        if (error) {
+            callback(new Error(error));
+        }
+
+        callback();
+    });
+});
+
+Then(/^I store the value of response message path (.*) as (.*) in scenario scope$/, function (path, variable, callback) {
     this.grpcucumber.storeValueOfResponseMessagePathInScenarioScope(path, variable);
     callback();
 });
 
-Then(/^I store the value of response message path (.*) as (.*) in global scope$/, function(path, variableName, callback) {
+Then(/^I store the value of response message path (.*) as (.*) in global scope$/, function (path, variableName, callback) {
     this.grpcucumber.storeValueOfResponseMessagePathInGlobalScope(path, variableName);
     callback();
 });
 
-Then(/^response status should be (.*)$/, function(value, callback) {
+Then(/^response status should be (.*)$/, function (value, callback) {
     let assertion = this.grpcucumber.assertResponseStatusMatch(value);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^response message path (.*) should be (((?!of type).*))$/, function(path, value, callback) {
+Then(/^response message path (.*) should be (((?!of type).*))$/, function (path, value, callback) {
     let assertion = this.grpcucumber.assertPathInResponseMessageMatchesExpression(path, value);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^response message path (.*) should not be (((?!of type).+))$/, function(path, value, callback) {
+Then(/^response message path (.*) should not be (((?!of type).+))$/, function (path, value, callback) {
     let assertion = this.grpcucumber.assertPathInResponseMessageDoesNotMatchExpression(path, value);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^response message path (.*) should be of type array$/, function(path, callback) {
+Then(/^response message path (.*) should be of type array$/, function (path, callback) {
     let assertion = this.grpcucumber.assertPathIsArray(path);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^response message path (.*) should be of type array with length (.*)$/, function(path, length, callback) {
+Then(/^response message path (.*) should be of type array with length (.*)$/, function (path, length, callback) {
     let assertion = this.grpcucumber.assertPathIsArrayWithLength(path, length);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^value of scenario variable (.*) should be (.*)$/, function(variableName, variableValue, callback) {
+Then(/^value of scenario variable (.*) should be (.*)$/, function (variableName, variableValue, callback) {
     let assertion = this.grpcucumber.assertScenarioVariableValueEqual(variableName, variableValue);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^value of scenario variable (.*) should not be (.*)$/, function(variableName, variableValue, callback) {
+Then(/^value of scenario variable (.*) should not be (.*)$/, function (variableName, variableValue, callback) {
     let assertion = this.grpcucumber.assertScenarioVariableValueNotEqual(variableName, variableValue);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^value of global variable (.*) should be (.*)$/, function(variableName, variableValue, callback) {
+Then(/^value of global variable (.*) should be (.*)$/, function (variableName, variableValue, callback) {
     let assertion = this.grpcucumber.assertGlobalVariableValueEqual(variableName, variableValue);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });
 
-Then(/^value of global variable (.*) should not be (.*)$/, function(variableName, variableValue, callback) {
+Then(/^value of global variable (.*) should not be (.*)$/, function (variableName, variableValue, callback) {
     let assertion = this.grpcucumber.assertGlobalVariableValueNotEqual(variableName, variableValue);
     this.grpcucumber.callbackWithAssertion(callback, assertion);
 });

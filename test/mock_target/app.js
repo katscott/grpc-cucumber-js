@@ -19,6 +19,7 @@ permissions and limitations under the License.
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const interpolate = require('interpolate');
+const piglatin = require('pig-latin')
 
 const languages = {
     'english': 'Hello {name}',
@@ -36,7 +37,7 @@ const PROTO_PATH = __dirname + '/helloworld.proto';
 
 const helloProto = protoLoader.loadSync(PROTO_PATH, {})['helloworld.Greeter'];
 
-const transform = function(message, instruction) {
+const transform = function (message, instruction) {
     if (typeof instruction === 'string' && instruction.toLowerCase() == 'uppercase') {
         return message.toUpperCase();
     }
@@ -48,12 +49,12 @@ const transform = function(message, instruction) {
     return message;
 };
 
-const greet = function(name, language, transformTo) {
+const greet = function (name, language, transformTo) {
     let greeting = languages[language];
     if (greeting === undefined) {
         greeting = 'O hai der {name}!';
     }
-    let message = interpolate(greeting, {name: name});
+    let message = interpolate(greeting, { name: name });
     return transform(message, transformTo);
 };
 
@@ -63,7 +64,7 @@ const sayHello = (call, callback) => {
     let seconds = Math.round(d.getTime() / 1000);
     let transformMeta = call.metadata.get('transform');
     let transformTo = transformMeta[0] || 'nothing';
-    let reply = {greeting: greet(call.request.name, call.request.language, transformTo), timestamp: {seconds: seconds}};
+    let reply = { greeting: greet(call.request.name, call.request.language, transformTo), timestamp: { seconds: seconds } };
     console.info('[sayHello REPLY](transform: ' + transformTo + '):' + JSON.stringify(reply));
     callback(null, reply);
 };
@@ -72,10 +73,10 @@ const sayHelloInMultipleLanguages = (call, callback) => {
     console.info('[sayHelloMultipleLanguages REQUEST]: ' + JSON.stringify(call.request) + ' | ' + JSON.stringify(call.metadata.get('transform')));
     let d = new Date();
     let seconds = Math.round(d.getTime() / 1000);
-    let reply = {greetings: [], timestamp: {seconds: seconds}};
+    let reply = { greetings: [], timestamp: { seconds: seconds } };
     let transformMeta = call.metadata.get('transform');
     let transformTo = transformMeta[0] || 'nothing';
-    call.request.languages.forEach(function(language) {
+    call.request.languages.forEach(function (language) {
         let greeting = greet(call.request.name, language, transformTo);
         reply.greetings.push(greeting);
     });
@@ -87,7 +88,7 @@ const saySomethingElse = (call, callback) => {
     console.info('[saySomethingElse REQUEST]:' + JSON.stringify(call.request) + ' | ' + JSON.stringify(call.metadata.get('transform')));
     let transformMeta = call.metadata.get('transform');
     let transformTo = transformMeta[0] || 'nothing';
-    let reply = {somethingElse: 'something else'};
+    let reply = { somethingElse: 'something else' };
     console.info('[saySomethingElse REPLY](transform: ' + transformTo + '):' + JSON.stringify(reply));
     callback(null, reply);
 };
@@ -100,6 +101,24 @@ const errorOut = (call, callback) => {
     });
 };
 
+const pigLatin = (call, callback) => {
+    console.info('[pigLatin STREAM OPEN]');
+    let messages = [];
+    call.on('data', function (data) {
+        console.info('[pigLatin STREAM DATA]: ' + JSON.stringify(data));
+        let message = piglatin(data.message);
+        messages.push(message);
+    });
+    call.on('end', function () {
+        let reply = {
+            messages: messages,
+            count: messages.length,
+        };
+        console.info('[pigLatin STREAM END]: ' + JSON.stringify(reply));
+        callback(null, reply);
+    });
+};
+
 const server = new grpc.Server();
 
 let credentials = grpc.ServerCredentials.createInsecure();
@@ -108,6 +127,7 @@ let methods = {
     sayHelloInMultipleLanguages: sayHelloInMultipleLanguages,
     saySomethingElse: saySomethingElse,
     errorOut: errorOut,
+    pigLatin: pigLatin,
 };
 
 let port = process.env.SERVER_PORT || 8443;
