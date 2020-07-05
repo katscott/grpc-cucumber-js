@@ -27,12 +27,19 @@ GIVEN:
 	I pipe contents of file (.*) to request message
 	I store the raw value (.*) as (.*) in scenario scope
 	I store the raw value (.*) as (.*) in global scope
+	I open a stream to (.*) with id (.*)
 
 WHEN:
 	I request (.*)
+	I write (.*) to stream (.*)
+	I write to stream (.*) with the data
+	I pipe contents of file (.*) to stream (.*)
+	I end the stream (.*)
 
 THEN:
+	I store the value of response message path (.*) as (.*) in scenario scope
 	I store the value of response message path (.*) as (.*) in global scope
+	response status should be (.*)
 	response message path (.*) should be (((?!of type).*))
 	response message path (.*) should not be (((?!of type).+))
 	response message path (.*) should be of type array
