@@ -20,7 +20,7 @@ permissions and limitations under the License.
 'use strict';
 
 const grpcucumber = require('../../../source/grpcucumber.js');
-const {Before} = require('cucumber');
+const {Before} = require('@cucumber/cucumber');
 
 const path = require('path');
 
