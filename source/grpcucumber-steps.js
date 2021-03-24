@@ -18,7 +18,7 @@ permissions and limitations under the License.
 /* eslint new-cap: "off", no-invalid-this: "off" */
 'use strict';
 
-const {Given, When, Then} = require('cucumber');
+const {Given, When, Then} = require('@cucumber/cucumber');
 
 Given(/^I store the raw value (.*) as (.*) in scenario scope$/, function(value, variable, callback) {
     this.grpcucumber.storeValueInScenarioScope(variable, value);

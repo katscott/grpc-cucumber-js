@@ -24,19 +24,19 @@
         "test:fail": "yarn run cucumber-js --require test/features/step_definitions/*.js --require test/features/support/init.js --tags @fail test/features"
     },
     "dependencies": {
-        "@grpc/grpc-js": "^1.1.0",
-        "@grpc/proto-loader": "^0.5.4",
+        "@grpc/grpc-js": "^1.2.12",
+        "@grpc/proto-loader": "^0.5.6",
         "JSONPath": "^0.11.2",
-        "google-auth-library": "^6.0.2",
+        "google-auth-library": "^7.0.2",
         "interpolate": "^0.1.0",
-        "is-my-json-valid": "^2.20.4",
-        "merge-options": "^2.0.0",
+        "is-my-json-valid": "^2.20.5",
+        "merge-options": "^3.0.4",
         "prettyjson": "^1.2.1"
     },
     "devDependencies": {
-        "cucumber": "^6.0.5",
-        "eslint": "^7.4.0",
+        "@cucumber/cucumber": "^7.0.0",
+        "eslint": "^7.22.0",
         "eslint-config-google": "^0.14.0",
-        "grpc": "^1.24.3"
+        "grpc": "^1.24.6"
     }
 }
