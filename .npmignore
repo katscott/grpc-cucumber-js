@@ -7,3 +7,5 @@ test
 .travis.yml
 publish.sh
 yarn.lock
+rollup.config.js
+tsconfig.json

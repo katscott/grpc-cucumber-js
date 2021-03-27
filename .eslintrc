@@ -1,16 +1,19 @@
 {
-    "extends": ["eslint:recommended", "google"],
-    "parserOptions": {
-        "ecmaVersion": 6
-    },
-    "env": {
-        "node": true,
-        "es6": true
-    },
-    "rules": {
-        "no-trailing-spaces": "off",
-        "require-jsdoc": "off",
-        "max-len": "off",
-        "valid-jsdoc": "off"
-    }
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "google", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "max-len": "off",
+    "no-trailing-spaces": "off",
+    "prettier/prettier": ["error"],
+    "require-jsdoc": "off",
+    "valid-jsdoc": "off"
+  }
 }
