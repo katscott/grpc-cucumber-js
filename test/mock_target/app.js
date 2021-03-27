@@ -19,6 +19,11 @@ permissions and limitations under the License.
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const interpolate = require('interpolate');
+const {
+  GrpcHealthCheck,
+  HealthCheckResponse,
+  HealthService,
+} = require('grpc-ts-health-check');
 
 const languages = {
   english: 'Hello {name}',
@@ -34,9 +39,9 @@ const languages = {
 
 const PROTO_PATH = __dirname + '/helloworld.proto';
 
-const helloProto = protoLoader.loadSync(PROTO_PATH, {})[
-  'helloworld.Greeter'
-];
+const serviceName = 'helloworld.Greeter';
+
+const helloProto = protoLoader.loadSync(PROTO_PATH, {})[serviceName];
 
 const transform = function (message, instruction) {
   if (
@@ -142,6 +147,16 @@ const errorOut = (call, callback) => {
   });
 };
 
+const healthCheckStatusMap = {
+  serviceName: HealthCheckResponse.ServingStatus.UNKNOWN,
+};
+
+const grpcHealthCheck = new GrpcHealthCheck(healthCheckStatusMap);
+grpcHealthCheck.setStatus(
+  serviceName,
+  HealthCheckResponse.ServingStatus.SERVING,
+);
+
 const server = new grpc.Server();
 
 const credentials = grpc.ServerCredentials.createInsecure();
@@ -153,7 +168,10 @@ const methods = {
 };
 
 const port = process.env.SERVER_PORT || 8443;
+
 server.addService(helloProto, methods);
+server.addService(HealthService, grpcHealthCheck);
+
 const returnValue = server.bind(`0.0.0.0:${port}`, credentials);
 if (returnValue == 0) {
   console.error('Failed to start GRPC server at port', port);

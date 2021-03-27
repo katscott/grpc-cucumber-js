@@ -583,7 +583,7 @@ buffer-from@^1.0.0:
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
   integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
 
-builtin-modules@^3.1.0:
+builtin-modules@^3.1.0, builtin-modules@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-3.2.0.tgz#45d5db99e7ee5e6bc4f362e008bf917ab5049887"
   integrity sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==
@@ -1301,6 +1301,24 @@ google-p12-pem@^3.0.3:
   integrity sha512-wS0ek4ZtFx/ACKYF3JhyGe5kzH7pgiQ7J5otlumqR9psmWMYc+U9cErKlCYVYHoUaidXHdZ2xbo34kB+S+24hA==
   dependencies:
     node-forge "^0.10.0"
+
+google-protobuf@^3.12.2:
+  version "3.15.6"
+  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.15.6.tgz#2048055828530993a51df4d4ca2c08322fc1ec7c"
+  integrity sha512-p65NyhIZFHFUxbIPOm6cygg2rCjK+2uDCxruOG3RaWKM9R4rBGX0STmlJoSOhoyAG8Fha7U8FP4pQomAV1JXsA==
+
+grpc-boom@^1.0.28:
+  version "1.0.28"
+  resolved "https://registry.yarnpkg.com/grpc-boom/-/grpc-boom-1.0.28.tgz#e4fcd789adfd76e97c5986076c9a6b774359cddb"
+  integrity sha512-hX9x67axsZtDRpzspAxD+UEQK9efx2Qo3j90pWQxxY89Pox/P+KI29offfxtIGJA48pUMfx9qc2QwkdBZzM4pg==
+
+grpc-ts-health-check@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/grpc-ts-health-check/-/grpc-ts-health-check-2.0.6.tgz#628d6acbef3fae4c4e6217c88870b605164a393d"
+  integrity sha512-3VepmtINdbU1ZZQ3w3WOMBgPhpfnvNtQWHy48ak+LepPHSVlV168vsUlYwQ7whj8A1kDyRs+ffLhAZQLGUwT6Q==
+  dependencies:
+    google-protobuf "^3.12.2"
+    grpc-boom "^1.0.28"
 
 grpc@^1.24.6:
   version "1.24.6"
