@@ -17,7 +17,8 @@ jobs:
           node-version: 12
       - run: yarn ci
       - run: yarn rollup -c
-      - run: yarn test
+      - run: yarn lint
+      - run: docker-compose up --exit-code-from test-runner
 
   publish-npm:
     needs: build
