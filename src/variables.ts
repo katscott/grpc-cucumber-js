@@ -15,30 +15,46 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing 
 permissions and limitations under the License.
 */
-/* eslint new-cap: "off", no-invalid-this: "off" */
 
-'use strict';
+export default class Variables {
+  private _variables: { [key: string]: never };
 
-const { GprcCucumber } = require('../../../dist');
-const { Before } = require('@cucumber/cucumber');
+  constructor() {
+    this._variables = {};
+  }
 
-const path = require('path');
+  /**
+   * Set a variable
+   */
+  set(name: string, value: never) {
+    this._variables[name] = value;
+  }
 
-const PROTO_PATH = path.join(
-  __dirname,
-  '../../mock_target',
-  'helloworld.proto',
-);
+  /**
+   * Get a variable
+   */
+  get(name: string) {
+    return this._variables[name];
+  }
 
-const defaultHost = 'localhost:8443';
-const envHost = process.env.GRPC_HOST;
-const host = envHost ? envHost : defaultHost;
+  /**
+   * Remove a variable
+   */
+  remove(name: string) {
+    delete this._variables[name];
+  }
 
-Before(function () {
-  this.grpcucumber = new GprcCucumber({
-    protoPath: PROTO_PATH,
-    serviceName: 'helloworld.Greeter',
-    grpcHost: host,
-    fixturesDirectory: path.join(__dirname, '../', 'fixtures'),
-  });
-});
+  /**
+   * Clear all variables
+   */
+  clear() {
+    this._variables = {};
+  }
+
+  /**
+   * Gets all variables
+   */
+  getAll() {
+    return this._variables;
+  }
+}

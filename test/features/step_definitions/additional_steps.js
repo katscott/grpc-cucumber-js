@@ -17,4 +17,4 @@ permissions and limitations under the License.
 */
 'use strict';
 
-module.exports = require('../../../source/grpcucumber-steps');
+module.exports = require('../../../dist/steps');
