@@ -8,22 +8,18 @@ on:
       - rollup
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: yarn ci
-      - run: yarn rollup -c
-      - run: yarn lint
-      - run: docker-compose up --exit-code-from test-runner
-
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Wait on build
+        uses: lewagon/wait-on-check-action@master
+        with:
+          ref: ${{ github.ref }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          running-workflow-name: 'build'
+          allowed-conclusions: success
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
