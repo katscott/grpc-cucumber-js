@@ -3,9 +3,6 @@ name: Publish
 on:
   release:
     types: [created]
-  push:
-    branches:
-      - rollup
 
 jobs:
   wait:
@@ -36,8 +33,6 @@ jobs:
           TAG_PREFIX: refs/tags/v
       - run: yarn ci
       - run: yarn rollup -c
-      - run: npm publish --dry-run
-      #- run: yarn publish --non-interactive
-      # env:
-      #   NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      #   PACKAGE_VERSION: ${{ steps.check-package-version.outputs.PACKAGE_VERSION }}
+      - run: yarn publish --non-interactive
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
