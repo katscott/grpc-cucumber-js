@@ -19,7 +19,7 @@ permissions and limitations under the License.
 
 'use strict';
 
-const { GprcCucumber } = require('../../../dist');
+const { GrpcCucumber } = require('../../../dist');
 const { Before } = require('@cucumber/cucumber');
 
 const path = require('path');
@@ -35,7 +35,7 @@ const envHost = process.env.GRPC_HOST;
 const host = envHost ? envHost : defaultHost;
 
 Before(function () {
-  this.grpcucumber = new GprcCucumber({
+  this.grpcucumber = new GrpcCucumber({
     protoPath: PROTO_PATH,
     serviceName: 'helloworld.Greeter',
     grpcHost: host,

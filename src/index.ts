@@ -1,5 +1,5 @@
-import GprcCucumber from './grpcCucumber';
+import GrpcCucumber from './grpcCucumber';
 
 export default {
-  GprcCucumber,
+  GrpcCucumber,
 };
