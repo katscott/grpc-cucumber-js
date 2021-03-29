@@ -30,6 +30,7 @@ service Greeter {
   rpc SayHelloInMultipleLanguages (HelloMultipleLanguageRequest) returns (HelloMultipleLanguageReply) {}
   rpc SaySomethingElse (google.protobuf.Empty) returns (SomethingElseReply) {}
   rpc ErrorOut (ErrorOutRequest) returns (ErrorOutReply) {}
+  rpc CheckTypes(CheckTypesRequest) returns (CheckTypesReply) {}
 }
 
 // The request message containing the user's name.
@@ -62,4 +63,16 @@ message ErrorOutRequest {
 
 // The response message that errors
 message ErrorOutReply {
+}
+
+// The request message for checking types
+message CheckTypesRequest {
+}
+
+// The response message for checking types
+message CheckTypesReply {
+  int32 number = 1;
+  string string = 2;
+  bool boolean = 3;
+  repeated int32 array = 4;
 }

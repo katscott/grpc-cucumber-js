@@ -193,6 +193,30 @@ Then(
 );
 
 Then(
+  /^response message path (.*) should be of type string$/,
+  function (path: any, callback: any) {
+    let assertion = this.grpcucumber.assertPathIsString(path);
+    this.grpcucumber.callbackWithAssertion(callback, assertion);
+  },
+);
+
+Then(
+  /^response message path (.*) should be of type number$/,
+  function (path: any, callback: any) {
+    let assertion = this.grpcucumber.assertPathIsNumber(path);
+    this.grpcucumber.callbackWithAssertion(callback, assertion);
+  },
+);
+
+Then(
+  /^response message path (.*) should be of type boolean$/,
+  function (path: any, callback: any) {
+    let assertion = this.grpcucumber.assertPathIsBoolean(path);
+    this.grpcucumber.callbackWithAssertion(callback, assertion);
+  },
+);
+
+Then(
   /^value of scenario variable (.*) should be (.*)$/,
   function (variableName: any, variableValue: any, callback: any) {
     let assertion = this.grpcucumber.assertScenarioVariableValueEqual(

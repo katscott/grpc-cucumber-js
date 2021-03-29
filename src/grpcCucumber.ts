@@ -188,7 +188,7 @@ export default class GprcCucumber {
         this.requestMetadata,
         function (error: any, responseMessage: never) {
           if (error) {
-            this.responseStatus = status[error.code];
+            this.responseStatus = error.code;
             this.responseError = error;
             callback(error);
           } else {
@@ -383,12 +383,12 @@ export default class GprcCucumber {
   assertResponseStatusMatch(value: string) {
     let expectedResult = true;
 
-    const expectedValue = status[$enum(status).asKeyOrDefault(value)];
-    const actualValue = $enum(status).asValueOrDefault(
-      this.responseStatus,
+    const expectedValue = $enum(status).asKeyOrDefault(value);
+    const actualValue = $enum(status).asKeyOrDefault(
+      status[this.responseStatus],
     );
 
-    let actualResult = expectedValue == expectedValue;
+    let actualResult = actualValue == expectedValue;
 
     return this.getAssertionResult(
       expectedResult,
@@ -437,8 +437,7 @@ export default class GprcCucumber {
    * Asserts that a path in the response message is an array
    */
   assertPathIsArray(path: string) {
-    path = this.replaceVariables(path);
-    const value = evaluatePath(path, this.getResponseMessage());
+    const value = this.getResponseMessagePathValue(path);
     const success = Array.isArray(value);
     return this.getAssertionResult(
       true,
@@ -456,13 +455,55 @@ export default class GprcCucumber {
     length = this.replaceVariables(length);
     let success = false;
     let actual = '?';
-    const value = evaluatePath(path, this.getResponseMessage());
+    const value = this.getResponseMessagePathValue(path);
     if (Array.isArray(value)) {
       success = value.length === Number(length);
       actual = String(value.length);
     }
 
     return this.getAssertionResult(true, success, length, actual);
+  }
+
+  /**
+   * Asserts that a path in the response message is a string
+   */
+  assertPathIsString(path: string) {
+    const value = this.getResponseMessagePathValue(path);
+    const success = typeof value === 'string';
+    return this.getAssertionResult(
+      true,
+      success,
+      'string',
+      typeof value,
+    );
+  }
+
+  /**
+   * Asserts that a path in the response message is a number
+   */
+  assertPathIsNumber(path: string) {
+    const value = this.getResponseMessagePathValue(path);
+    const success = typeof value === 'number';
+    return this.getAssertionResult(
+      true,
+      success,
+      'number',
+      typeof value,
+    );
+  }
+
+  /**
+   * Asserts that a path in the response message is a boolean
+   */
+  assertPathIsBoolean(path: string) {
+    const value = this.getResponseMessagePathValue(path);
+    const success = typeof value === 'boolean';
+    return this.getAssertionResult(
+      true,
+      success,
+      'boolean',
+      typeof value,
+    );
   }
 
   /**

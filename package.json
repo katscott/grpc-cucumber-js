@@ -1,6 +1,6 @@
 {
   "name": "grpc-cucumber-js",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "author": "Katie Scott <reineskat@gmail.com>",
   "description": "Gherkin framework for gRPC API cucumber-js testing",
   "homepage": "https://github.com/katscott/grpc-cucumber-js",
@@ -17,11 +17,13 @@
   ],
   "license": "Apache-2.0",
   "scripts": {
+    "build": "rollup -c",
     "lint": "yarn run eslint '**/*.js'",
     "mock": "node test/mock_target/app.js",
     "mock:stop": "pkill -f mock",
     "test": "yarn run cucumber-js --require test/features/step_definitions/*.js --require test/features/support/init.js --tags @core test/features",
     "test:fail": "yarn run cucumber-js --require test/features/step_definitions/*.js --require test/features/support/init.js --tags @fail test/features",
+    "test:mine": "yarn run cucumber-js --require test/features/step_definitions/*.js --require test/features/support/init.js --tags @mine test/features",
     "preci": "rm -fr node_modules",
     "ci": "yarn install --frozen-lockfile"
   },
