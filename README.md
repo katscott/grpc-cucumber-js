@@ -9,9 +9,10 @@ Inspired by handy libraries for testing REST APIs like [apickli](https://github.
 ## Basic Start
 
 Install with your usual tool via `yarn add grpc-cucumber-js` or `npm install grpc-cucumber-js`.
-Then you need to initialize the library to your gprc API in a Before cucumber event.  A good example of a basic set up can be found in [test/features/support/init.js](test/features/support/init.js).
+Then you need to initialize the library to your gprc API in a Before cucumber event. A good example of a basic set up can be found in [test/features/support/init.js](test/features/support/init.js).
 
 ## Built-in Gherkin Expressions
+
 The following gherkin expressions are available within the framework [source/grpcucumber-steps.js](source/grpcucumber-steps.js):
 
 ```
@@ -35,6 +36,9 @@ THEN:
 	I store the value of response message path (.*) as (.*) in global scope
 	response message path (.*) should be (((?!of type).*))
 	response message path (.*) should not be (((?!of type).+))
+	response message path (.*) should be of type string
+	response message path (.*) should be of type number
+	response message path (.*) should be of type boolean
 	response message path (.*) should be of type array
 	response message path (.*) should be of type array with length (.*)
 	value of scenario variable (.*) should be (.*)
@@ -52,23 +56,22 @@ By default, backticks are use to indicate a variable in a feature file, but can 
 ```
 Before(function() {
     this.grpcucumber = new grpcucumber.grpcucumber(
-		'localhost:8080', 
-		PROTO_PATH, 
-		'Greeter', 
-		credentials, 
+		'localhost:8080',
+		PROTO_PATH,
+		'Greeter',
+		credentials,
 		{ variableDelimiter: '{}' }
 	);
 });
 ```
 
-
 ## Quick commands
 
-| Function                   | Command          |
-| :------------------------- | :--------------- |
-| Run mock server            | `yarn run mock`  |
-| Run tests (run mock first) | `yarn run test`  |
-| Run lint                   | `yarn run lint`  |
+| Function                   | Command         |
+| :------------------------- | :-------------- |
+| Run mock server            | `yarn run mock` |
+| Run tests (run mock first) | `yarn run test` |
+| Run lint                   | `yarn run lint` |
 
 # Contributing to grpc-cucumber-js
 

@@ -147,6 +147,18 @@ const errorOut = (call, callback) => {
   });
 };
 
+const checkTypes = (call, callback) => {
+  console.info('[checkTypes REQUEST]');
+  const reply = {
+    number: 1,
+    string: 'string',
+    boolean: true,
+    array: [1, 2],
+  };
+  console.info('[checkTypes REPLY]:' + JSON.stringify(reply));
+  return callback(null, reply);
+};
+
 const healthCheckStatusMap = {
   serviceName: HealthCheckResponse.ServingStatus.UNKNOWN,
 };
@@ -165,6 +177,7 @@ const methods = {
   sayHelloInMultipleLanguages: sayHelloInMultipleLanguages,
   saySomethingElse: saySomethingElse,
   errorOut: errorOut,
+  checkTypes: checkTypes,
 };
 
 const port = process.env.SERVER_PORT || 8443;
