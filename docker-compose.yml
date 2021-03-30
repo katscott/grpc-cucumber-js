@@ -12,7 +12,7 @@ services:
         ]
       interval: 5s
       timeout: 1s
-      start_period: 5s
+      start_period: 60s
     ports:
       - '8443:8443'
     volumes:
@@ -23,7 +23,8 @@ services:
     image: node:12
     command: yarn test
     depends_on:
-      - mock-service
+      mock-service:
+        condition: service_healthy
     environment:
       GRPC_HOST: mock-service:8443
     volumes:
